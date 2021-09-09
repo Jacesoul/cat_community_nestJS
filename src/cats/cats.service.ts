@@ -1,3 +1,4 @@
+import { CatsRepository } from './cats.repository';
 import { CatRequestDto } from './dto/cats.request.dto';
 import {
   Injectable,
@@ -11,11 +12,11 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class CatsService {
-  constructor(@InjectModel(Cat.name) private readonly catModel: Model<Cat>) {}
+  constructor(private readonly catsRepository: CatsRepository) {}
 
   async signUp(body: CatRequestDto) {
     const { email, name, password } = body;
-    const isCatExist = await this.catModel.exists({ email });
+    const isCatExist = await this.catsRepository.existsByEmail(email);
     // catModel안에 쿼리 메서드가 있다.
     // return값으로 Promise<boolean>으로 주게된다.
 
@@ -25,7 +26,7 @@ export class CatsService {
     }
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const cat = await this.catModel.create({
+    const cat = await this.catsRepository.create({
       email,
       name,
       password: hashedPassword,
