@@ -5,14 +5,16 @@ import { AuthService } from './auth.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt/jwt.strategy';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     PassportModule.register({ defaultStrategy: 'jwt', session: false }), // 나중에 만들 Strategy에 대해서 기본적인 설정을 해줄수 있다. 세션 쿠키를 사용하지 않기 때문에 session은 false로 설정
 
     // JWT 생성 모듈
     JwtModule.register({
-      secret: 'secret',
+      secret: process.env.SECRET_KEY,
       signOptions: { expiresIn: '1y' },
     }), // 로그인시에 사용
 
