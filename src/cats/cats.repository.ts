@@ -8,6 +8,14 @@ import { Model } from 'mongoose';
 export class CatsRepository {
   constructor(@InjectModel(Cat.name) private readonly catModel: Model<Cat>) {}
 
+  async findCatByIdWithoutPassword(catId: string): Promise<Cat | null> {
+    const cat = await await this.catModel.findById(catId).select('-password');
+    // 가지고 오고 싶지 않은 항목은 앞에 마이너스(-)를 붙인다.
+    // 이메일과 이름만 가져오고 싶은경우는 이렇게 -> select('email name')
+    // 보안상 이유로 request.use에 저장할 때 password 필드를 제외하고 저장하는것이 좋다.
+    return cat;
+  }
+
   async findCatByEmail(email: string): Promise<Cat | null> {
     const cat = await this.catModel.findOne({ email });
     return cat;

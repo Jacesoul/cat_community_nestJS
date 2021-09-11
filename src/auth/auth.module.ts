@@ -12,7 +12,7 @@ import { JwtStrategy } from './jwt/jwt.strategy';
 
     // JWT 생성 모듈
     JwtModule.register({
-      secret: process.env.SECRET_KEY,
+      secret: 'secret',
       signOptions: { expiresIn: '1y' },
     }), // 로그인시에 사용
 

@@ -9,11 +9,16 @@ import {
   Get,
   Post,
   Body,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { CatsService } from './cats.service';
 import { CatRequestDto } from './dto/cats.request.dto';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from 'src/auth/auth.service';
+import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
+import { Request } from 'express';
+import { CurrentUser } from 'src/common/decorators/user.decorator';
 
 @Controller('cats')
 @UseInterceptors(SuccessInterceptor)
@@ -25,10 +30,14 @@ export class CatsController {
   ) {}
 
   @ApiOperation({ summary: '현재 고양이 가져오기' })
+  @UseGuards(JwtAuthGuard)
   @Get()
-  getCurrentCat() {
-    return 'current cat';
+  getCurrentCat(@CurrentUser() cat) {
+    return cat.readOnlyData; // 커스텀 데코레이터를 사용해서 추상화(높은 인터페이스 제공)
   }
+  // getCurrentCat(@Req() req: Request) {
+  //   return req.user;
+  // }
 
   @ApiResponse({
     status: 500,
