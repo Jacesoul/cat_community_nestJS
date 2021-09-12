@@ -8,6 +8,16 @@ import { Model } from 'mongoose';
 export class CatsRepository {
   constructor(@InjectModel(Cat.name) private readonly catModel: Model<Cat>) {}
 
+  async findByIdAndUpdateImg(id: string, fileName: string) {
+    const cat = await this.catModel.findById(id);
+
+    cat.imgUrl = `http://localhost:8000/media/${fileName}`;
+
+    const newCat = await cat.save();
+    console.log(newCat);
+    return newCat.readOnlyData;
+  }
+
   async findCatByIdWithoutPassword(catId: string): Promise<Cat | null> {
     const cat = await await this.catModel.findById(catId).select('-password');
     // 가지고 오고 싶지 않은 항목은 앞에 마이너스(-)를 붙인다.

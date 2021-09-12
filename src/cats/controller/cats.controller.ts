@@ -1,7 +1,8 @@
-import { LoginRequestDto } from './../auth/dto/login.request.dto';
-import { ReadOnlyCatDto } from './dto/cat.dto';
-import { HttpExceptionFilter } from './../common/exceptions/http-exception.filter';
-import { SuccessInterceptor } from './../common/interceptors/success.interceptor';
+import { multerOptions } from '../../common/utils/multer.options';
+import { LoginRequestDto } from '../../auth/dto/login.request.dto';
+import { ReadOnlyCatDto } from '../dto/cat.dto';
+import { HttpExceptionFilter } from '../../common/exceptions/http-exception.filter';
+import { SuccessInterceptor } from '../../common/interceptors/success.interceptor';
 import {
   Controller,
   UseInterceptors,
@@ -11,14 +12,17 @@ import {
   Body,
   UseGuards,
   Req,
+  UploadedFiles,
 } from '@nestjs/common';
-import { CatsService } from './cats.service';
-import { CatRequestDto } from './dto/cats.request.dto';
+import { CatsService } from '../services/cats.service';
+import { CatRequestDto } from '../dto/cats.request.dto';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from 'src/auth/auth.service';
 import { JwtAuthGuard } from 'src/auth/jwt/jwt.guard';
 import { Request } from 'express';
 import { CurrentUser } from 'src/common/decorators/user.decorator';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { Cat } from '../cats.schema';
 
 @Controller('cats')
 @UseInterceptors(SuccessInterceptor)
@@ -67,8 +71,16 @@ export class CatsController {
   }
 
   @ApiOperation({ summary: '고양이 이미지 업로드' })
-  @Post('upload/cats')
-  uploadCatImg() {
-    return 'uploadImg';
+  @UseInterceptors(FilesInterceptor('image', 10, multerOptions('cats'))) // 첫번째 인자에는 fieldName을 적는다. 두번째인자에는 maxCount로 몇개까지 업로드할수 있는지 제한을 둘수 있다. 세번재 인자에는 multer.options.ts에서 만든 multerOptions를 넣으면 된다.
+  @UseGuards(JwtAuthGuard)
+  @Post('upload')
+  uploadCatImg(
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @CurrentUser() cat: Cat,
+  ) {
+    console.log(files);
+    // return 'uploadImg';
+    // return { image: `http://localhost:8000/media/cats/${files[0].filename}` };
+    return this.catsService.uploadImg(cat, files);
   }
 }

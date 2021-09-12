@@ -4,9 +4,11 @@ import { HttpExceptionFilter } from './common/exceptions/http-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as expressBasicAuth from 'express-basic-auth';
+import * as path from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
   app.use(
@@ -18,6 +20,13 @@ async function bootstrap() {
       },
     }),
   );
+
+  // useStaticAssets 미들웨어는 express application이라고 명시를 해줘야지 에러가 생가지 않는다. 제네릭으로 NestExpressApplication 추가해주기
+  app.useStaticAssets(path.join(__dirname, './common', 'uploads'), {
+    prefix: '/media',
+    // http://localhost:8000/media/cats/aaa.png
+    // 이 미들웨어를 사용하면 해당 폴더에 url로 접근할수 있도록 할수 있다.
+  });
 
   const config = new DocumentBuilder()
     .setTitle('C.I.C')
