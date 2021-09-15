@@ -1,3 +1,4 @@
+import { CommentsSchema, Comments } from './../comments/comments.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Module, forwardRef } from '@nestjs/common';
 import { CatsController } from './controller/cats.controller';
@@ -13,7 +14,10 @@ import { MulterModule } from '@nestjs/platform-express';
       // dest는 destination의 약자이다.
       dest: './upload',
     }),
-    MongooseModule.forFeature([{ name: Cat.name, schema: CatSchema }]),
+    MongooseModule.forFeature([
+      { name: Cat.name, schema: CatSchema },
+      { name: Comments.name, schema: CommentsSchema },
+    ]),
     forwardRef(() => AuthModule), // 순환참조 해결
   ],
   controllers: [CatsController],

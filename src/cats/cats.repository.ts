@@ -1,12 +1,22 @@
+import { CommentsSchema } from './../comments/comments.schema';
 import { CatRequestDto } from './dto/cats.request.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable, HttpException } from '@nestjs/common';
 import { Cat } from './cats.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
+import * as mongoose from 'mongoose';
 
 @Injectable()
 export class CatsRepository {
   constructor(@InjectModel(Cat.name) private readonly catModel: Model<Cat>) {}
+
+  async findAll() {
+    const CommentsModel = mongoose.model('comments', CommentsSchema);
+    const result = await this.catModel
+      .find()
+      .populate('comments', CommentsModel);
+    return result;
+  }
 
   async findByIdAndUpdateImg(id: string, fileName: string) {
     const cat = await this.catModel.findById(id);
@@ -18,7 +28,9 @@ export class CatsRepository {
     return newCat.readOnlyData;
   }
 
-  async findCatByIdWithoutPassword(catId: string): Promise<Cat | null> {
+  async findCatByIdWithoutPassword(
+    catId: string | Types.ObjectId,
+  ): Promise<Cat | null> {
     const cat = await await this.catModel.findById(catId).select('-password');
     // 가지고 오고 싶지 않은 항목은 앞에 마이너스(-)를 붙인다.
     // 이메일과 이름만 가져오고 싶은경우는 이렇게 -> select('email name')

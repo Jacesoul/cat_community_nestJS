@@ -53,7 +53,7 @@ export class CatsController {
     type: ReadOnlyCatDto,
   })
   @ApiOperation({ summary: '회원가입' })
-  @Post()
+  @Post('signup')
   async signUp(@Body() body: CatRequestDto) {
     return await this.catsService.signUp(body);
   }
@@ -82,5 +82,11 @@ export class CatsController {
     // return 'uploadImg';
     // return { image: `http://localhost:8000/media/cats/${files[0].filename}` };
     return this.catsService.uploadImg(cat, files);
+  }
+
+  @ApiOperation({ summary: '모든 고양이 가져오기' })
+  @Get('all')
+  getAllCat() {
+    return this.catsService.getAllCat();
   }
 }
